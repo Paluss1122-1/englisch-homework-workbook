@@ -165,7 +165,7 @@
       <button onclick="toall()">Dashboard</button>
     </div>
     <h1 id="homework"></h1>
-    <!--<img id="workbookImage" src=" " alt="">-->
+    <div id="pictures"></div>
   </div>
 
   <script>
@@ -175,7 +175,7 @@
     function toall() {
       window.location.href = "https://solutions-dashboard-7.netlify.app";
     }
-    
+
     async function getHausaufgaben() {
       try {
         const response = await fetch('https://backend-website-zqow.onrender.com/api/hausaufgaben');
@@ -191,6 +191,40 @@
         return null;
       }
     }
+
+    let currentImages = {};
+    const API_BASE_URL = 'https://backend-website-zqow.onrender.com';
+
+    async function fetchAndDisplayImages() {
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/images/${'Englisch'}`);
+        const result = await response.json();
+
+        if (result.success) {
+          currentImages = result.images;
+          displayImages(result.images);
+        } else {
+          currentImages = [];
+          displayImages([]);
+        }
+      } catch (error) {
+        console.error('Fehler beim Laden der Bilder:', error);
+      }
+    }
+
+    function displayImages(images) {
+      if (images.length === 0) {
+        return;
+      }
+
+      document.getElementById('pictures').innerHTML = images.map((image, index) => `
+                <div class="image-item">
+                    <img id="workbookImage" src="${API_BASE_URL}/api/images/file/${image.filename}" alt="${image.originalName}" style="box-shadow: none;">
+                </div>`).join('');
+    }
+
+    fetchAndDisplayImages()
 
     // Verwendung
     async function update() {
