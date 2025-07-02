@@ -222,9 +222,9 @@
           const snap = await getDoc(docRef);
           if (snap.exists()) {
             const data = snap.data();
-            homeworkElem.innerText = data.Englisch || "Keine Englisch-Hausaufgabe";
+            homeworkElem.innerText = data.Englisch || "Keine Hausaufgabe";
             dateElem.innerText = data.EnglischDatum; // du kannst auch ein Datum aus Firestore speichern, falls gewünscht
-            document.title = `${data.EnglischDatum} - Hausaufgaben Lösungen Englisch`;
+            document.title = `${data.EnglischDatum} - Hausaufgaben Lösungen`;
           } else {
             homeworkElem.innerText = "Daten nicht gefunden! Fehler wurde automatisiert gemeldet!";
             dateElem.innerText = "-";
@@ -302,11 +302,7 @@
               zeit: new Date().toISOString(),
               link: window.location.href,
               name: name
-            }).then((docRef) => {
-              console.log('Analytics gespeichert mit ID: ', docRef.id);
-            }).catch((error) => {
-              console.error('Fehler beim Analytics-Speichern: ', error);
-            });
+            })
           }
         });
       }
