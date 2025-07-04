@@ -157,7 +157,6 @@
     }
   </style>
   <script type="module">
-    let started = false
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
     import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -227,14 +226,17 @@
             homeworkElem.innerText = data.Englisch || "Keine Hausaufgabe";
             dateElem.innerText = data.EnglischDatum; // du kannst auch ein Datum aus Firestore speichern, falls gewünscht
             document.title = `${data.EnglischDatum} - Hausaufgaben Lösungen`;
-            if (data.Englisch == "NICHTS!" && !started) {
-              const gallery = document.getElementById('pictures')
-              const img = document.createElement('img')
-              img.src = "https://xmyszcahhvgcrwjyqdsq.supabase.co/storage/v1/object/public/bilder/Generell/41S-5Y8WjdL._SL500_.jpg"
-              img.alt = " "
-              img.id = 'workbookImage'
-              gallery.appendChild(img)
-              started = true;
+            if (data.Englisch == "NICHTS!") {
+              const gallery = document.getElementById('pictures');
+              const imgSrc = "https://xmyszcahhvgcrwjyqdsq.supabase.co/storage/v1/object/public/bilder/Generell/41S-5Y8WjdL._SL500_.jpg";
+              const alreadyExists = !!gallery.querySelector(`img#workbookImage[src="${imgSrc}"]`);
+              if (!alreadyExists) {
+              const img = document.createElement('img');
+              img.src = imgSrc;
+              img.alt = " ";
+              img.id = 'workbookImage';
+              gallery.appendChild(img);
+              }
             }
           } else {
             homeworkElem.innerText = "Daten nicht gefunden! Fehler wurde automatisiert gemeldet!";
