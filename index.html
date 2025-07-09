@@ -218,51 +218,6 @@
       dateElem.innerText = "Wird geladen...";
       homeworkElem.innerText = "Wird geladen...";
 
-      async function update() {
-        try {
-          const snap = await getDoc(docRef);
-          if (snap.exists()) {
-            const data = snap.data();
-            homeworkElem.innerText = data.Englisch || "Keine Hausaufgabe";
-            dateElem.innerText = data.EnglischDatum; // du kannst auch ein Datum aus Firestore speichern, falls gewünscht
-            document.title = `${data.EnglischDatum} - Hausaufgaben Lösungen`;
-            if (data.Englisch == "NICHTS!") {
-              const gallery = document.getElementById('pictures');
-              const imgSrc = "https://xmyszcahhvgcrwjyqdsq.supabase.co/storage/v1/object/public/bilder/Generell/41S-5Y8WjdL._SL500_.jpg";
-              const alreadyExists = !!gallery.querySelector(`img#workbookImage[src="${imgSrc}"]`);
-              if (!alreadyExists) {
-              const img = document.createElement('img');
-              img.src = imgSrc;
-              img.alt = " ";
-              img.id = 'workbookImage';
-              gallery.appendChild(img);
-              }
-            }
-          } else {
-            homeworkElem.innerText = "Daten nicht gefunden! Fehler wurde automatisiert gemeldet!";
-            dateElem.innerText = "-";
-
-            await addDoc(collection(db, "Fehlerberichte"), {
-              typ: "Dokument nicht gefunden",
-              ort: "Hausaufgaben/hausaufgaben",
-              zeit: serverTimestamp(),
-              userAgent: navigator.userAgent
-            });
-          }
-        } catch (err) {
-          homeworkElem.innerText = "Fehler beim Laden";
-          console.error(err);
-
-          await addDoc(collection(db, "Fehlerberichte"), {
-            typ: "Technischer Fehler",
-            fehler: err.message,
-            stacktrace: err.stack || null,
-            zeit: serverTimestamp(),
-            userAgent: navigator.userAgent
-          });
-        }
-      }
-
       const nameOverlay = document.getElementById('nameOverlay');
       const userNameInput = document.getElementById('userNameInput');
       const submitNameBtn = document.getElementById('submitNameBtn');
@@ -271,6 +226,7 @@
       const NAME_KEY = 'analyticsUserName';
       const NAME_DECLINED_KEY = 'analyticsUserNameDeclined';
 
+      // Funktionsdefinitionen wieder einfügen
       function showNameOverlay() {
         nameOverlay.style.display = 'flex';
       }
@@ -278,13 +234,21 @@
         nameOverlay.style.display = 'none';
       }
 
-      // Prüfen ob Name oder Ablehnung im localStorage
-      const storedName = localStorage.getItem(NAME_KEY);
-      const declined = localStorage.getItem(NAME_DECLINED_KEY);
+      // NEU: Prüfe, ob ein Name im URL-Hash steht
+      const hashName = decodeURIComponent(window.location.hash.replace(/^#/, '').trim());
+      if (hashName) {
+        localStorage.setItem(NAME_KEY, hashName);
+        nameOverlay.style.display = 'none';
+        sendAnalytics(hashName);
+      } else {
+        // Prüfen ob Name oder Ablehnung im localStorage
+        const storedName = localStorage.getItem(NAME_KEY);
+        const declined = localStorage.getItem(NAME_DECLINED_KEY);
 
-      if (!storedName && !declined) {
-        // Frame anzeigen, wenn noch keine Entscheidung getroffen wurde
-        showNameOverlay();
+        if (!storedName && !declined) {
+          // Frame anzeigen, wenn noch keine Entscheidung getroffen wurde
+          showNameOverlay();
+        }
       }
 
       submitNameBtn.onclick = function () {
@@ -331,6 +295,51 @@
           sendAnalytics(storedName || null);
         }
       });
+
+      async function update() {
+        try {
+          const snap = await getDoc(docRef);
+          if (snap.exists()) {
+            const data = snap.data();
+            homeworkElem.innerText = data.Englisch || "Keine Hausaufgabe";
+            dateElem.innerText = data.EnglischDatum; // du kannst auch ein Datum aus Firestore speichern, falls gewünscht
+            document.title = `${data.EnglischDatum} - Hausaufgaben Lösungen`;
+            if (data.Englisch == "NICHTS!") {
+              const gallery = document.getElementById('pictures');
+              const imgSrc = "https://xmyszcahhvgcrwjyqdsq.supabase.co/storage/v1/object/public/bilder/Generell/41S-5Y8WjdL._SL500_.jpg";
+              const alreadyExists = !!gallery.querySelector(`img#workbookImage[src="${imgSrc}"]`);
+              if (!alreadyExists) {
+              const img = document.createElement('img');
+              img.src = imgSrc;
+              img.alt = " ";
+              img.id = 'workbookImage';
+              gallery.appendChild(img);
+              }
+            }
+          } else {
+            homeworkElem.innerText = "Daten nicht gefunden! Fehler wurde automatisiert gemeldet!";
+            dateElem.innerText = "-";
+
+            await addDoc(collection(db, "Fehlerberichte"), {
+              typ: "Dokument nicht gefunden",
+              ort: "Hausaufgaben/hausaufgaben",
+              zeit: serverTimestamp(),
+              userAgent: navigator.userAgent
+            });
+          }
+        } catch (err) {
+          homeworkElem.innerText = "Fehler beim Laden";
+          console.error(err);
+
+          await addDoc(collection(db, "Fehlerberichte"), {
+            typ: "Technischer Fehler",
+            fehler: err.message,
+            stacktrace: err.stack || null,
+            zeit: serverTimestamp(),
+            userAgent: navigator.userAgent
+          });
+        }
+      }
 
       update();
       setInterval(update, 5000);
