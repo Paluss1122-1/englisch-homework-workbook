@@ -1,3 +1,4 @@
+<!--UPDATE 19:35, 9.7-->
 <!DOCTYPE html>
 <html lang="de">
 
@@ -281,7 +282,7 @@
               browser: getBrowserName(),
               device: navigator.platform,
               zeit: new Date().toISOString(),
-              link: window.location.href,
+              link: window.location.href.split('#')[0],
               name: name
             })
           }
