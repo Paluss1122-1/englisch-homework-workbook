@@ -261,8 +261,11 @@
     // Wartungsarbeiten-Frame Logik (wie im Dashboard, aber mit Supabase)
     import { createClient } from 'https://esm.sh/@supabase/supabase-js';
     const supabaseUrl = 'https://xmyszcahhvgcrwjyqdsq.supabase.co';
+    window.supabaseUrl = supabaseUrl
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhteXN6Y2FoaHZnY3J3anlxZHNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkxNDM0NTksImV4cCI6MjA2NDcxOTQ1OX0.2UIRYj3R_jpS-YhhYud6d5aWfNDrPpK-jy8Vi_HP-ao';
+    window.supabaseKey = supabaseKey
     const supabase = createClient(supabaseUrl, supabaseKey);
+    window.supabase = supabase
     const maintenanceFrame = document.getElementById('maintenance-frame');
     const timeWs = document.getElementById('time-ws');
     const whyWs = document.getElementById('why-ws');
