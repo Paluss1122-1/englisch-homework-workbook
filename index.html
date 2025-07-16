@@ -156,6 +156,61 @@
       color: black;
       padding: 5px;
     }
+
+    .notification-settings {
+      margin-top: 20px;
+      padding: 20px;
+      background-color: rgba(0, 0, 0, 0.5);
+      border-radius: 10px;
+      color: white;
+      text-align: left;
+      width: 90%;
+      max-width: 600px;
+      margin-left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .notification-settings h4 {
+      margin-bottom: 15px;
+      color: #0aff02;
+    }
+
+    .notification-row {
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .notification-row label {
+      font-size: 18px;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .notification-row input[type="radio"] {
+      accent-color: #808080;
+      width: 18px;
+      height: 18px;
+    }
+
+    .notification-settings button {
+      background-color: #0aff02;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+      margin-top: 10px;
+    }
+
+    .notification-settings button:hover {
+      background-color: #00c800;
+    }
   </style>
   <!--KI Chatbot-->
   <script>
@@ -228,18 +283,27 @@
       </button>
       <button onclick="toall()">Dashboard</button>
     </div>
+    <div class="notification-settings offer">
+      <h4><u>Benachrichtigungen</u></h4>
+      <div class="notification-row">
+        <label>Empfangen:</label>
+        <div class="notif-options">
+          <label>
+            <input type="radio" name="notif-setting" value="never" checked>
+            Nie
+          </label>
+          <label>
+            <input type="radio" name="notif-setting" value="homework">
+            Alle Hausaufgaben
+          </label>
+        </div>
+      </div>
+      <button onclick="saveNotificationPreference()">Speichern</button>
+      <div id="notify-status" style="margin-bottom: 10px; color: red; font-size: 20px;"></div>
+    </div>
     <h1 id="homework"></h1>
     <div id="pictures"></div>
   </div>
-  <div id="notification-settings" style="margin: 20px 0;">
-    <label for="notify-select" style="font-size: 1.2em;">Benachrichtigungen:</label>
-    <select id="notify-select" style="font-size: 1em;">
-      <option value="never">Nie</option>
-      <option value="homework">Wenn Hausi, egal mit oder ohne Lösung</option>
-    </select>
-    <button onclick="saveNotificationPreference()" class="normal">Speichern</button>
-  </div>
-  <div id="notify-status" style="margin-bottom: 10px; color: green;"></div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
@@ -298,18 +362,37 @@
 
     const VAPID_KEY = "BKacEwWB-oQLbm-5UdughuEOJr4Ht7Cu18NxNJWKGT15YdVGdpuoJzA4Se5L2nJXLldvBE8jAKLGhzVT7o757zU"; // Aus Firebase Console
 
+    window.window.onload = function () {
+      const element = document.querySelector('[value="never"]');
+      const element2 = document.querySelector('[value="homework"]');
+      const pref = localStorage.getItem('notifyPref');
+      if (!pref || pref === 'never') {
+        element.checked = true;
+      } else {
+        element2.checked = true;
+      }
+    }
+
     window.saveNotificationPreference = async function () {
-      const pref = document.getElementById('notify-select').value;
+      if (localStorage.getItem('notifyPref') == document.querySelector('input[name="notif-setting"]:checked').value) {
+        document.getElementById('notify-status').innerText = "Einstellungen übernommen!";
+        setTimeout(() => {
+          document.getElementById('notify-status').innerText = " ";
+        }, 3000);
+        return
+      }
+      const pref = document.querySelector('input[name="notif-setting"]:checked').value;
       localStorage.setItem('notifyPref', pref);
 
       if (pref === "never") {
         document.getElementById('notify-status').innerText = "Benachrichtigungen deaktiviert.";
-        emailjs.send("service_kulm5f9", "template_mqt39s4", {
-          token: token,
-          pref: pref
+        emailjs.send("service_kulm5f9", "template_ynnizjt", {
+          token: localStorage.getItem('notifyPref'),
+          pref: pref,
+          website: "Englisch"
         })
           .then(function (response) {
-            document.getElementById('notify-status').innerText = "Token wurde per E-Mail verschickt!";
+            document.getElementById('notify-status').innerText = "Erfolg, wird innerhalb der nächsten 24h funktionieren!";
           }, function (error) {
             document.getElementById('notify-status').innerText = "Fehler beim E-Mail-Versand.";
           });
@@ -320,7 +403,7 @@
         let token;
         let registration;
         try {
-          registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+          registration = await navigator.serviceWorker.register('firebase-messaging-sw.js');
         } catch (err) {
           document.getElementById('notify-status').innerText = "Service Worker konnte nicht registriert werden. Bitte lade die Seite neu oder prüfe die Browser-Einstellungen.";
           return;
@@ -336,12 +419,13 @@
           return;
         }
         localStorage.setItem('token', token);
-        emailjs.send("service_kulm5f9", "template_mqt39s4", {
+        emailjs.send("service_kulm5f9", "template_ynnizjt", {
           token: token,
-          pref: pref
+          pref: pref,
+          website: "Englisch"
         })
           .then(function (response) {
-            document.getElementById('notify-status').innerText = "Token wurde per E-Mail verschickt!";
+            document.getElementById('notify-status').innerText = "Erfolg, wird innerhalb der nächsten 24h funktionieren!";
           }, function (error) {
             document.getElementById('notify-status').innerText = "Fehler beim E-Mail-Versand.";
           });
@@ -350,16 +434,15 @@
       }
     }
 
-    // Auswahl beim Laden setzen
-    document.addEventListener('DOMContentLoaded', () => {
-      const pref = localStorage.getItem('notifyPref') || 'never';
-      document.getElementById('notify-select').value = pref;
-    });
-
-    // Popup im Vordergrund
-    onMessage(messaging, (payload) => {
-      alert(payload.notification.title + "\n" + payload.notification.body);
-    });
+    // Notification-Settings Logik mit Radios
+    function saveNotificationPreference() {
+      const value = document.querySelector('input[name="notif-setting"]:checked').value;
+      localStorage.setItem('notificationSetting', value);
+      const status = document.getElementById('notify-status');
+      status.textContent = 'Benachrichtigungseinstellung gespeichert: ' + (value === 'never' ? 'Nie' : 'Nur Hausaufgaben');
+      status.style.color = '#0aff02';
+      setTimeout(() => status.textContent = '', 2000);
+    }
   </script>
 
   <script type="module">
